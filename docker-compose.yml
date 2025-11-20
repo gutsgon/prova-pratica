@@ -1,0 +1,84 @@
+services:
+  api:
+    image: catalogo-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5000:8080" 
+    depends_on:
+      - db
+      - minio
+      - createbuckets
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=db;Port=5432;Database=catalogodb;User Id=admin;Password=admin;Ssl Mode=Disable;Pooling=False;
+      - AWS__ServiceURL=http://minio:9000
+      - AWS__PublicURL=http://localhost:9000 
+      - AWS__AccessKey=minioadmin
+      - AWS__SecretKey=minioadmin
+    networks:
+      - catalogo-network
+
+  tests:
+    image: mcr.microsoft.com/dotnet/sdk:9.0
+    container_name: catalogo-tests
+    volumes:
+      - .:/src
+    working_dir: /src
+    command: dotnet test CatalogoDeProdutos.Tests/CatalogoDeProdutos.Tests.csproj --logger "console;verbosity=normal"
+    networks:
+      - catalogo-network
+  
+  db:
+    image: postgres:15
+    container_name: catalogo-db
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=catalogodb
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - catalogo-network
+  
+  minio:
+    image: minio/minio:latest
+    container_name: catalogo-minio
+    command: server /data --console-address ":9001"
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - catalogo-network
+
+  createbuckets:
+    image: minio/mc
+    depends_on:
+      - minio
+    networks:
+      - catalogo-network
+    entrypoint: >
+      /bin/sh -c "
+      echo 'Aguardando MinIO iniciar...';
+      sleep 10; 
+      /usr/bin/mc alias set myminio http://minio:9000 minioadmin minioadmin;
+      /usr/bin/mc mb myminio/products-images;
+      /usr/bin/mc anonymous set public myminio/products-images;
+      exit 0;
+      "
+
+volumes:
+  postgres_data:
+  minio_data:
+
+networks:
+  catalogo-network:
+    driver: bridge
