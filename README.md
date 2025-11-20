@@ -23,7 +23,7 @@ Este projeto é uma API REST desenvolvida como desafio técnico para gerenciamen
 ### 2. Clone o projeto
 
 ```bash
-git clone https://github.com/gutsgon/prova-pratica.git
+git clone -b main https://github.com/gutsgon/prova-pratica.git
 cd prova-pratica
 ```
 
@@ -128,3 +128,4 @@ O projeto segue estritamente a **Clean Architecture**:
   ├── docker-compose.yml
   └── README.md
 ```
+
