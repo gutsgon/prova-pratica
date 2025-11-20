@@ -56,17 +56,7 @@ Esse comando irá:
 
 ---
 
-### 4. Configurar o Banco de Dados
-
-Após os containers subirem, execute a migração para criar as tabelas:
-
-```bash
-dotnet ef database update -p CatalogoDeProdutos.Infrastructure -s CatalogoDeProdutos.API
-```
-
----
-
-### 5. Acessar a aplicação
+### 4. Acessar a aplicação
 
 - **Swagger (API Docs)**: http://localhost:5000/swagger
 - **MinIO Console (Arquivos)**: http://localhost:9001
@@ -128,4 +118,5 @@ O projeto segue estritamente a **Clean Architecture**:
   ├── docker-compose.yml
   └── README.md
 ```
+
 
